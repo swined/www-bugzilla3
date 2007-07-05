@@ -9,7 +9,7 @@ use RPC::XML::Parser;
 use LWP::UserAgent;
 use HTTP::Cookies;
 
-our $VERSION = '0.1.1';
+our $VERSION = '0.2';
 
 =head1 NAME
 
@@ -17,7 +17,7 @@ WWW::Bugzilla3 - perl bindings for Bugzilla 3.0 API
 
 =head1 VERSION
 
-Version 0.1.1
+Version 0.2
 
 =head1 SYNOPSIS
 
