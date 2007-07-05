@@ -9,7 +9,7 @@ use RPC::XML::Parser;
 use LWP::UserAgent;
 use HTTP::Cookies;
 
-our $VERSION = '0.1';
+our $VERSION = '0.1.1';
 
 =head1 NAME
 
@@ -17,13 +17,13 @@ WWW::Bugzilla3 - perl bindings for Bugzilla 3.0 API
 
 =head1 VERSION
 
-Version 0.1
+Version 0.1.1
 
 =head1 SYNOPSIS
 
 	use WWW::Bugzilla3;
 
-	my $bz = WWW::Bugzilla3->new(site => 'bugz.somesite.org');
+	my $bz = new WWW::Bugzilla3(site => 'bugz.somesite.org');
 	$bz->login('user@host.org', 'PaSsWoRd');
 	...
 
@@ -65,7 +65,9 @@ sub _xml_request($$$) {
 }
 
 =head2 new()
-	Creates new Bugzilla3 object. 
+
+	Creates new Bugzilla3 object.
+	 
 =cut
 
 sub new($%) {
@@ -82,7 +84,9 @@ sub new($%) {
 }
 
 =head2 login(login, password)
+
 	Logs into bugzilla. Returns id of successfully logged in user. 
+	
 =cut
 
 sub login($$$) {
@@ -97,7 +101,9 @@ sub login($$$) {
 }
 
 =head2 logout()
+
 	Logs out. Does nothing if you are not logged in.
+	
 =cut
 
 sub logout($) {
@@ -109,7 +115,9 @@ sub logout($) {
 }
 
 =head2 offer_account_by_email(email)
+
 	Sends an email to the user, offering to create an account. The user will have to click on a URL in the email, and choose their password and real name.
+	
 =cut
 
 sub offer_account_by_email($$) {
@@ -123,7 +131,9 @@ sub offer_account_by_email($$) {
 }
 
 =head2 create_user(email, full_name, password)
+
 	Creates a user account directly in Bugzilla, password and all. Instead of this, you should use "offer_account_by_email" when possible, because that makes sure that the email address specified can actually receive an email. This function does not check that. Returns id of newly created user.
+	
 =cut
 
 sub create_user($$$$) {
@@ -139,7 +149,9 @@ sub create_user($$$$) {
 }
 
 =head2 get_selectable_products()
+
 	Returns an array of the ids of the products the user can search on.	
+	
 =cut
 
 sub get_selectable_products($) {
@@ -151,7 +163,9 @@ sub get_selectable_products($) {
 }
 
 =head2 get_enterable_products()
+
 	Returns an array of the ids of the products the user can enter bugs against.
+	
 =cut
 
 sub get_enterable_products($) {
@@ -163,7 +177,9 @@ sub get_enterable_products($) {
 }
 
 =head2 get_accessible_products()
+
 	Returns an array of the ids of the products the user can search or enter bugs against.	
+	
 =cut
 
 sub get_accessible_products($) {
@@ -175,9 +191,10 @@ sub get_accessible_products($) {
 }
 
 =head2 get_products(ids)
-	Returns an array of hashes. Each hash describes a product, and has the following items: id, name, description, and internals. The id item is the id of the product. The name item is the name of the product. The description is the description of the product. Finally, the internals is an internal representation of the product.
 
+	Returns an array of hashes. Each hash describes a product, and has the following items: id, name, description, and internals. The id item is the id of the product. The name item is the name of the product. The description is the description of the product. Finally, the internals is an internal representation of the product.
 	Note, that if the user tries to access a product that is not in the list of accessible products for the user, or a product that does not exist, that is silently ignored, and no information about that product is returned.
+	
 =cut
 
 sub get_products($@) {
@@ -193,7 +210,9 @@ sub get_products($@) {
 }
 
 =head2 version()
+
 	Returns bugzilla version.
+	
 =cut
 
 sub version($) {
@@ -205,7 +224,9 @@ sub version($) {
 }
 
 =head2 timezone()
+
 	Returns the timezone of the server Bugzilla is running on. This is important because all dates/times that the webservice interface returns will be in this timezone. 
+	
 =cut
 
 sub timezone($) {
@@ -217,7 +238,9 @@ sub timezone($) {
 }
 
 =head2 legal_values(field, product_id)
+
 	Returns an array of values that are allowed for a particular field.
+	
 =cut
 
 sub legal_values($$$) {
@@ -232,6 +255,7 @@ sub legal_values($$$) {
 }
 
 =head2 get_bugs(ids)
+
 	Gets information about particular bugs in the database. ids is an array of numbers and strings. 
 	If an element in the array is entirely numeric, it represents a bug_id from the Bugzilla database to fetch. If it contains any non-numeric characters, it is considered to be a bug alias instead, and the bug with that alias will be loaded.
 	Note that it's possible for aliases to be disabled in Bugzilla, in which case you will be told that you have specified an invalid bug_id if you try to specify an alias. (It will be error 100.)
@@ -241,6 +265,7 @@ sub legal_values($$$) {
 	summary - The summary of this bug.
 	creation_time - When the bug was created.
 	last_change_time - When the bug was last changed.
+	
 =cut
 
 sub get_bugs($@) {
@@ -256,6 +281,7 @@ sub get_bugs($@) {
 }
 
 =head2 create_bug(...) 
+
 	This allows you to create a new bug in Bugzilla. If you specify any invalid fields, they will be ignored. If you specify any fields you are not allowed to set, they will just be set to their defaults or ignored.
 	Some params must be set, or an error will be thrown. These params are marked Required.
 	Some parameters can have defaults set in Bugzilla, by the administrator. If these parameters have defaults set, you can omit them. These parameters are marked Defaulted.
@@ -278,6 +304,7 @@ sub get_bugs($@) {
 	target_milestone (string) - A valid target milestone for this product.
 	In addition to the above parameters, if your installation has any custom fields, you can set them just by passing in the name of the field and its value as a string.
 	Returns one element, id. This is the id of the newly-filed bug.
+	
 =cut
 
 sub create_bug($%) {
@@ -335,8 +362,6 @@ L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=WWW-Bugzilla3>
 L<http://search.cpan.org/dist/WWW-Bugzilla3>
 
 =back
-
-=head1 ACKNOWLEDGEMENTS
 
 =head1 COPYRIGHT & LICENSE
 
