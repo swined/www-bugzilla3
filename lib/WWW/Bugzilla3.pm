@@ -1,6 +1,8 @@
-package WWW::Bugzilla3;
+#!/usr/bin/perl
 
 # $Id$
+
+package WWW::Bugzilla3;
 
 use warnings;
 use strict;
