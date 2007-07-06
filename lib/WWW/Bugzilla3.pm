@@ -1,6 +1,5 @@
 package WWW::Bugzilla3;
 
-# $Rev: 18 $
 # $Id$
 
 use warnings;
