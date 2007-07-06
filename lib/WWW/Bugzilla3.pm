@@ -12,7 +12,6 @@ use HTTP::Cookies;
 our $VERSION = '0.3';
 # $Rev: $
 
-
 =head1 NAME
 
 WWW::Bugzilla3 - perl bindings for Bugzilla 3.0 api
