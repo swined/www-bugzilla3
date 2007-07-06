@@ -2,6 +2,8 @@ use strict;
 use warnings;
 use ExtUtils::MakeMaker;
 
+# $Id$
+
 WriteMakefile(
     NAME                => 'WWW::Bugzilla3',
     AUTHOR              => 'Alexey Alexandrov <swined@cpan.org>',
