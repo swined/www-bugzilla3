@@ -9,15 +9,15 @@ use RPC::XML::Parser;
 use LWP::UserAgent;
 use HTTP::Cookies;
 
-our $VERSION = '0.2';
+our $VERSION = '0.3';
 
 =head1 NAME
 
-WWW::Bugzilla3 - perl bindings for Bugzilla 3.0 API
+WWW::Bugzilla3 - perl bindings for Bugzilla 3.0 api
 
 =head1 VERSION
 
-Version 0.2
+v0.3
 
 =head1 SYNOPSIS
 
@@ -66,7 +66,7 @@ sub _xml_request($$$) {
 
 =head2 new()
 
-	Creates new Bugzilla3 object.
+Creates new Bugzilla3 object.
 	 
 =cut
 
@@ -85,7 +85,7 @@ sub new($%) {
 
 =head2 login(login, password)
 
-	Logs into bugzilla. Returns id of successfully logged in user. 
+Logs into bugzilla. Returns id of successfully logged in user. 
 	
 =cut
 
@@ -102,7 +102,7 @@ sub login($$$) {
 
 =head2 logout()
 
-	Logs out. Does nothing if you are not logged in.
+Logs out. Does nothing if you are not logged in.
 	
 =cut
 
@@ -116,7 +116,7 @@ sub logout($) {
 
 =head2 offer_account_by_email(email)
 
-	Sends an email to the user, offering to create an account. The user will have to click on a URL in the email, and choose their password and real name.
+Sends an email to the user, offering to create an account. The user will have to click on a URL in the email, and choose their password and real name.
 	
 =cut
 
@@ -132,7 +132,7 @@ sub offer_account_by_email($$) {
 
 =head2 create_user(email, full_name, password)
 
-	Creates a user account directly in Bugzilla, password and all. Instead of this, you should use "offer_account_by_email" when possible, because that makes sure that the email address specified can actually receive an email. This function does not check that. Returns id of newly created user.
+Creates a user account directly in Bugzilla, password and all. Instead of this, you should use "offer_account_by_email" when possible, because that makes sure that the email address specified can actually receive an email. This function does not check that. Returns id of newly created user.
 	
 =cut
 
@@ -150,7 +150,7 @@ sub create_user($$$$) {
 
 =head2 get_selectable_products()
 
-	Returns an array of the ids of the products the user can search on.	
+Returns an array of the ids of the products the user can search on.	
 	
 =cut
 
@@ -164,7 +164,7 @@ sub get_selectable_products($) {
 
 =head2 get_enterable_products()
 
-	Returns an array of the ids of the products the user can enter bugs against.
+Returns an array of the ids of the products the user can enter bugs against.
 	
 =cut
 
@@ -178,7 +178,7 @@ sub get_enterable_products($) {
 
 =head2 get_accessible_products()
 
-	Returns an array of the ids of the products the user can search or enter bugs against.	
+Returns an array of the ids of the products the user can search or enter bugs against.	
 	
 =cut
 
@@ -192,8 +192,8 @@ sub get_accessible_products($) {
 
 =head2 get_products(ids)
 
-	Returns an array of hashes. Each hash describes a product, and has the following items: id, name, description, and internals. The id item is the id of the product. The name item is the name of the product. The description is the description of the product. Finally, the internals is an internal representation of the product.
-	Note, that if the user tries to access a product that is not in the list of accessible products for the user, or a product that does not exist, that is silently ignored, and no information about that product is returned.
+Returns an array of hashes. Each hash describes a product, and has the following items: id, name, description, and internals. The id item is the id of the product. The name item is the name of the product. The description is the description of the product. Finally, the internals is an internal representation of the product.
+Note, that if the user tries to access a product that is not in the list of accessible products for the user, or a product that does not exist, that is silently ignored, and no information about that product is returned.
 	
 =cut
 
@@ -211,7 +211,7 @@ sub get_products($@) {
 
 =head2 version()
 
-	Returns bugzilla version.
+Returns bugzilla version.
 	
 =cut
 
@@ -225,7 +225,7 @@ sub version($) {
 
 =head2 timezone()
 
-	Returns the timezone of the server Bugzilla is running on. This is important because all dates/times that the webservice interface returns will be in this timezone. 
+Returns the timezone of the server Bugzilla is running on. This is important because all dates/times that the webservice interface returns will be in this timezone. 
 	
 =cut
 
@@ -239,7 +239,7 @@ sub timezone($) {
 
 =head2 legal_values(field, product_id)
 
-	Returns an array of values that are allowed for a particular field.
+Returns an array of values that are allowed for a particular field.
 	
 =cut
 
@@ -256,15 +256,15 @@ sub legal_values($$$) {
 
 =head2 get_bugs(ids)
 
-	Gets information about particular bugs in the database. ids is an array of numbers and strings. 
-	If an element in the array is entirely numeric, it represents a bug_id from the Bugzilla database to fetch. If it contains any non-numeric characters, it is considered to be a bug alias instead, and the bug with that alias will be loaded.
-	Note that it's possible for aliases to be disabled in Bugzilla, in which case you will be told that you have specified an invalid bug_id if you try to specify an alias. (It will be error 100.)
-	Returns an array of hashes. Each hash contains the following items:
-	id - The numeric bug_id of this bug.
-	alias - The alias of this bug. If there is no alias or aliases are disabled in this Bugzilla, this will be an empty string.
-	summary - The summary of this bug.
-	creation_time - When the bug was created.
-	last_change_time - When the bug was last changed.
+Gets information about particular bugs in the database. ids is an array of numbers and strings. 
+If an element in the array is entirely numeric, it represents a bug_id from the Bugzilla database to fetch. If it contains any non-numeric characters, it is considered to be a bug alias instead, and the bug with that alias will be loaded.
+Note that it's possible for aliases to be disabled in Bugzilla, in which case you will be told that you have specified an invalid bug_id if you try to specify an alias. (It will be error 100.)
+Returns an array of hashes. Each hash contains the following items:
+id - The numeric bug_id of this bug.
+alias - The alias of this bug. If there is no alias or aliases are disabled in this Bugzilla, this will be an empty string.
+summary - The summary of this bug.
+creation_time - When the bug was created.
+last_change_time - When the bug was last changed.
 	
 =cut
 
@@ -282,29 +282,29 @@ sub get_bugs($@) {
 
 =head2 create_bug(...) 
 
-	This allows you to create a new bug in Bugzilla. If you specify any invalid fields, they will be ignored. If you specify any fields you are not allowed to set, they will just be set to their defaults or ignored.
-	Some params must be set, or an error will be thrown. These params are marked Required.
-	Some parameters can have defaults set in Bugzilla, by the administrator. If these parameters have defaults set, you can omit them. These parameters are marked Defaulted.
-	Clients that want to be able to interact uniformly with multiple Bugzillas should always set both the params marked Required and those marked Defaulted, because some Bugzillas may not have defaults set for Defaulted parameters, and then this method will throw an error if you don't specify them.
-	The descriptions of the parameters below are what they mean when Bugzilla is being used to track software bugs. They may have other meanings in some installations.
-	product (string) Required - The name of the product the bug is being filed against. 
-	component (string) Required - The name of a component in the product above. 
-	summary (string) Required - A brief description of the bug being filed. 
-	version (string) Required - A version of the product above; the version the bug was found in. 
-	description (string) Defaulted - The initial description for this bug. Some Bugzilla installations require this to not be blank. 
-	op_sys (string) Defaulted - The operating system the bug was discovered on. 
-	platform (string) Defaulted - What type of hardware the bug was experienced on. 
-	priority (string) Defaulted - What order the bug will be fixed in by the developer, compared to the developer's other bugs. 
-	severity (string) Defaulted - How severe the bug is. 
-	alias (string) - A brief alias for the bug that can be used instead of a bug number when accessing this bug. Must be unique in all of this Bugzilla. 
-	assigned_to (username) - A user to assign this bug to, if you don't want it to be assigned to the component owner. 
-	cc (array) - An array of usernames to CC on this bug. 
-	qa_contact (username) - If this installation has QA Contacts enabled, you can set the QA Contact here if you don't want to use the component's default QA Contact. 
-	status (string) - The status that this bug should start out as. Note that only certain statuses can be set on bug creation. 
-	target_milestone (string) - A valid target milestone for this product.
-	In addition to the above parameters, if your installation has any custom fields, you can set them just by passing in the name of the field and its value as a string.
-	Returns one element, id. This is the id of the newly-filed bug.
-	
+This allows you to create a new bug in Bugzilla. If you specify any invalid fields, they will be ignored. If you specify any fields you are not allowed to set, they will just be set to their defaults or ignored.
+Some params must be set, or an error will be thrown. These params are marked Required.
+Some parameters can have defaults set in Bugzilla, by the administrator. If these parameters have defaults set, you can omit them. These parameters are marked Defaulted.
+Clients that want to be able to interact uniformly with multiple Bugzillas should always set both the params marked Required and those marked Defaulted, because some Bugzillas may not have defaults set for Defaulted parameters, and then this method will throw an error if you don't specify them.
+The descriptions of the parameters below are what they mean when Bugzilla is being used to track software bugs. They may have other meanings in some installations.
+product (string) Required - The name of the product the bug is being filed against. 
+component (string) Required - The name of a component in the product above. 
+summary (string) Required - A brief description of the bug being filed. 
+version (string) Required - A version of the product above; the version the bug was found in. 
+description (string) Defaulted - The initial description for this bug. Some Bugzilla installations require this to not be blank. 
+op_sys (string) Defaulted - The operating system the bug was discovered on. 
+platform (string) Defaulted - What type of hardware the bug was experienced on. 
+priority (string) Defaulted - What order the bug will be fixed in by the developer, compared to the developer's other bugs. 
+severity (string) Defaulted - How severe the bug is. 
+alias (string) - A brief alias for the bug that can be used instead of a bug number when accessing this bug. Must be unique in all of this Bugzilla. 
+assigned_to (username) - A user to assign this bug to, if you don't want it to be assigned to the component owner. 
+cc (array) - An array of usernames to CC on this bug. 
+qa_contact (username) - If this installation has QA Contacts enabled, you can set the QA Contact here if you don't want to use the component's default QA Contact. 
+status (string) - The status that this bug should start out as. Note that only certain statuses can be set on bug creation. 
+target_milestone (string) - A valid target milestone for this product.
+In addition to the above parameters, if your installation has any custom fields, you can set them just by passing in the name of the field and its value as a string.
+Returns one element, id. This is the id of the newly-filed bug.
+
 =cut
 
 sub create_bug($%) {
@@ -341,7 +341,7 @@ You can find documentation for this module with the perldoc command.
 
 	perldoc WWW::Bugzilla3
 
-	You can also look for information at:
+You can also look for information at:
 
 =over 4
 
