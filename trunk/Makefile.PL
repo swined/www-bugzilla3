@@ -1,8 +1,10 @@
+#!/usr/bin/perl
+
+# $Id$
+
 use strict;
 use warnings;
 use ExtUtils::MakeMaker;
-
-# $Id$
 
 WriteMakefile(
     NAME                => 'WWW::Bugzilla3',
