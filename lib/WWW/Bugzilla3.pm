@@ -10,7 +10,8 @@ use LWP::UserAgent;
 use HTTP::Cookies;
 
 our $VERSION = '0.3';
-# $Rev:$:
+# $Rev$
+# $Ver: $
 
 =head1 NAME
 
