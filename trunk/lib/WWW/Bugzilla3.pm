@@ -11,7 +11,6 @@ use HTTP::Cookies;
 
 our $VERSION = '0.3';
 # $Rev$
-# $Ver: $
 
 =head1 NAME
 
