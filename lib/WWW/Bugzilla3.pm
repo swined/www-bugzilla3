@@ -1,5 +1,5 @@
 package WWW::Bugzilla3;
-# $Id $
+# $Id:$
 
 use warnings;
 use strict;
