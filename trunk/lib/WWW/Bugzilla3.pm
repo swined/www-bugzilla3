@@ -12,8 +12,9 @@ use RPC::XML;
 use RPC::XML::Parser;
 use LWP::UserAgent;
 use HTTP::Cookies;
+use URI::Escape;
 
-our $VERSION = '0.3';
+our $VERSION = '0.4';
 
 
 =head1 NAME
@@ -22,7 +23,7 @@ WWW::Bugzilla3 - perl bindings for Bugzilla 3.0 api
 
 =head1 VERSION
 
-v0.3
+v0.4
 
 =head1 SYNOPSIS
 
@@ -325,6 +326,32 @@ sub create_bug($%) {
 	my $rs = $self->_xml_request('Bug.create', $params);
 	return $rs->value->{id}->value;
 }
+
+=head2 named_search(name)
+
+Execute saved search. Returns list of bugs.
+
+=cut
+
+sub named_search($$) {
+	my ($self, $cmd) = @_;
+	return $self->search(cmdtype => 'runnamed', namedcmd => $cmd);
+}
+
+=head search(...)
+
+Execute search. Returns list of bugs.
+
+=cut
+
+sub search($%) {
+	my ($self, %param) = @_;
+	$param{ctype} = 'atom';
+	my $r = $self->_post($self->{site} . 'buglist.cgi', join '&', 
+		map { uri_escape($_) . "=" . uri_escape($param{$_}) } keys %param);
+	return grep s/^.*<id>.*?\?id=(\d+)<\/id>.*$/$1/, split "\n", $r;
+}
+
 
 1;
 
