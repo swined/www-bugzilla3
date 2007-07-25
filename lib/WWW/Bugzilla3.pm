@@ -14,7 +14,7 @@ use LWP::UserAgent;
 use HTTP::Cookies;
 use URI::Escape;
 
-our $VERSION = '0.4';
+our $VERSION = '0.5';
 
 
 =head1 NAME
@@ -23,7 +23,7 @@ WWW::Bugzilla3 - perl bindings for Bugzilla 3.0 api
 
 =head1 VERSION
 
-v0.4
+v0.5
 
 =head1 SYNOPSIS
 
@@ -338,7 +338,7 @@ sub named_search($$) {
 	return $self->search(cmdtype => 'runnamed', namedcmd => $cmd);
 }
 
-=head search(...)
+=head2 search(...)
 
 Execute search. Returns list of bugs.
 
