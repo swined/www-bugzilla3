@@ -1,7 +1,10 @@
 Revision history for WWW-Bugzilla3
 
+0.5	25 Jul 2007
+	Documentation update.
+
 0.4	09 Jul 2007
-	add named_search() and search() methods
+	Add named_search() and search() methods.
 
 0.3	06 Jul 2007
 	Documentation update.
