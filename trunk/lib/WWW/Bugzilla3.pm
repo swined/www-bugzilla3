@@ -8,13 +8,10 @@ use warnings;
 use strict;
 
 use Carp;
-use RPC::XML;
-use RPC::XML::Parser;
-use LWP::UserAgent;
-use HTTP::Cookies;
+use RPC::XML::Client;
 use URI::Escape;
 
-our $VERSION = '0.5';
+our $VERSION = '0.6';
 
 
 =head1 NAME
@@ -23,7 +20,7 @@ WWW::Bugzilla3 - perl bindings for Bugzilla 3.0 api
 
 =head1 VERSION
 
-v0.5
+v0.6
 
 =head1 SYNOPSIS
 
@@ -37,37 +34,12 @@ v0.5
 
 =cut
 
-sub _xstr($) { new RPC::XML::string(shift) }
-
-sub _xdie($) {
-	my $rs = shift;
-	croak $rs unless ref $rs;
-	croak "Error " . $rs->value->{faultCode}->value .
-		": " . $rs->value->{faultString}->value . "\n"
-		if $rs->is_fault;
-}
-
 sub _post($$) {
 	my ($self, $u, $c) = @_;
         my $wrq = new HTTP::Request(POST => $u);
         $wrq->content($c);
-        my $wrs = $self->{useragent}->request($wrq);
+        my $wrs = $self->{rpc}->useragent->request($wrq);
 	return $wrs->content;
-}
-
-sub _prepare_xml_request($$) {
-	my ($m, $v) = @_;
-	my $st = new RPC::XML::struct($v);
-	my $rq = new RPC::XML::request($m, $st);
-	return $rq->as_string;
-}
-
-sub _xml_request($$$) {
-	my ($self, $m, $v) = @_;
-	my $rt = $self->_post($self->{xmlrpc}, _prepare_xml_request($m, $v));
-	my $rs = (new RPC::XML::Parser)->parse($rt);
-	_xdie $rs;
-	return $rs;
 }
 
 =head2 new()
@@ -82,211 +54,186 @@ sub new($%) {
 	croak "Cannot create Bugzilla3 object without 'site'\n" unless $param{site};
 	$param{site} = "http://" . $param{site} unless $param{site} =~ /^http:\/\//;
 	$param{site} .= "/" unless $param{site} =~ /\/$/;
-	$param{xmlrpc} = $param{site} . 'xmlrpc.cgi';
-	$param{useragent} = new LWP::UserAgent;
-	$param{useragent}->cookie_jar(new HTTP::Cookies);
+	$param{rpcurl} = $param{site} . 'xmlrpc.cgi';
+	$param{rpc} = RPC::XML::Client->new($param{rpcurl});
+	$param{rpc}->error_handler(sub { croak shift });
+	$param{rpc}->fault_handler(sub { croak shift->{faultString}->value });
+	$param{rpc}->useragent->cookie_jar({});
 	bless \%param, $class;
 	return \%param;
 }
 
-=head2 login(login, password)
+=head2 login
 
-Logs into bugzilla. Returns id of successfully logged in user. 
+	in: login, password
+	out: user id  
+
+Logs into bugzilla.  
 	
 =cut
 
 sub login($$$) {
-	my ($self, $l, $p, $r) = @_;
-	my $rs = $self->_xml_request(
-		'User.login', 
-		{ 
-			'login' => _xstr $l, 
-			'password' => _xstr $p,
-		});
-	return $rs->value->{id}->value;
+	shift->{rpc}->simple_request('User.login', { 
+		'login' => shift, 
+		'password' => shift,
+	})->{id};
 }
 
-=head2 logout()
+=head2 logout
 
 Logs out. Does nothing if you are not logged in.
 	
 =cut
 
 sub logout($) {
-	my ($self) = @_;
-	$self->_xml_request(
-		'User.logout', 
-		{ });
-	return undef;
+	shift->{rpc}->simple_request('User.logout');
 }
 
-=head2 offer_account_by_email(email)
+=head2 offer_account_by_email
+
+	in: email
 
 Sends an email to the user, offering to create an account. The user will have to click on a URL in the email, and choose their password and real name.
 	
 =cut
 
 sub offer_account_by_email($$) {
-	my ($self, $m) = @_;
-	$self->_xml_request(
-		'User.offer_account_by_email',
-		{ 
-			email => _xstr $m,
-		});
-	return undef;
+	shift->{rpc}->simple_request('User.offer_account_by_email', { 
+		email => shift,
+	});
 }
 
-=head2 create_user(email, full_name, password)
+=head2 create_user
+	
+	in: email, full_name, password
+	out: user id
 
-Creates a user account directly in Bugzilla, password and all. Instead of this, you should use "offer_account_by_email" when possible, because that makes sure that the email address specified can actually receive an email. This function does not check that. Returns id of newly created user.
+Creates a user account directly in Bugzilla. Returns id of newly created user.
 	
 =cut
 
 sub create_user($$$$) {
-	my ($self, $m, $n, $p) = @_;
-	my $rs = $self->_xml_request(
-		'User.create',
-		{
-			email => _xstr $m,
-			full_name => _xstr $n,
-			password => _xstr $p,
-		});
-	return $rs->value->{id}->value;
+	shift->{rpc}->simple_request('User.create', {
+		email => shift,
+		full_name => shift,
+		password => shift,
+	})->{id};
 }
 
-=head2 get_selectable_products()
+=head2 get_selectable_products
+
+	out: ids
 
 Returns an array of the ids of the products the user can search on.	
 	
 =cut
 
 sub get_selectable_products($) {
-	my ($self) = @_;
-	my $rs = $self->_xml_request(
-		'Product.get_selectable_products',
-		{ });
-	return @{$rs->value->{ids}->value};
+	@{shift->{rpc}->simple_request('Product.get_selectable_products')->{ids}};
 }
 
-=head2 get_enterable_products()
+=head2 get_enterable_products
+
+	out: ids
 
 Returns an array of the ids of the products the user can enter bugs against.
 	
 =cut
 
 sub get_enterable_products($) {
-	my ($self) = @_;
-	my $rs = $self->_xml_request(
-		'Product.get_enterable_products',
-		{ });
-	return @{$rs->value->{ids}->value};
+	@{shift->{rpc}->simple_request('Product.get_enterable_products')->{ids}};
 }
 
-=head2 get_accessible_products()
+=head2 get_accessible_products
+
+	out: ids
 
 Returns an array of the ids of the products the user can search or enter bugs against.	
 	
 =cut
 
 sub get_accessible_products($) {
-	my ($self) = @_;
-	my $rs = $self->_xml_request(
-		'Product.get_accessible_products',
-		{ });
-	return @{$rs->value->{ids}->value};
+	@{shift->{rpc}->simple_request('Product.get_accessible_products')->{ids}};
 }
 
-=head2 get_products(ids)
+=head2 get_products
+
+	in: ids
+	out: products
 
 Returns an array of hashes. Each hash describes a product, and has the following items: id, name, description, and internals. The id item is the id of the product. The name item is the name of the product. The description is the description of the product. Finally, the internals is an internal representation of the product.
-Note, that if the user tries to access a product that is not in the list of accessible products for the user, or a product that does not exist, that is silently ignored, and no information about that product is returned.
 	
 =cut
 
 sub get_products($@) {
 	my ($self, @ids) = @_;
-	my $rs = $self->_xml_request(
-		'Product.get_products',
-		{
-			'ids' => new RPC::XML::array(
-				map { new RPC::XML::int($_) } @ids
-			),
-		});
-	return @{$rs->value->{products}->value};
+	@{$self->{rpc}->simple_request('Product.get_products', {
+		'ids' => \@ids,
+	})->{products}};
 }
 
-=head2 version()
+=head2 version
+	
+	out: version
 
 Returns bugzilla version.
 	
 =cut
 
 sub version($) {
-	my ($self) = @_;
-	my $rs = $self->_xml_request(
-		'Bugzilla.version',
-		{});
-	return $rs->value->{version}->value;
+	shift->{rpc}->simple_request('Bugzilla.version')->{version};
 }
 
-=head2 timezone()
+=head2 timezone
 
-Returns the timezone of the server Bugzilla is running on. This is important because all dates/times that the webservice interface returns will be in this timezone. 
+	out: timezone
+
+Returns the timezone of the server Bugzilla is running on.  
 	
 =cut
 
 sub timezone($) {
-	my ($self) = @_;
-	my $rs = $self->_xml_request(
-		'Bugzilla.timezone',
-		{});
-	return $rs->value->{timezone}->value;
+	shift->{rpc}->simple_request('Bugzilla.timezone')->{timezone};
 }
 
-=head2 legal_values(field, product_id)
+=head2 legal_values
+	
+	in: field, product_id
+	out: values
 
 Returns an array of values that are allowed for a particular field.
 	
 =cut
 
 sub legal_values($$$) {
-	my ($self, $f, $p) = @_;
-	my $rs = $self->_xml_request(
-		'Bug.legal_values',
-		{
-			field => _xstr $f,
-			product_id => new RPC::XML::int($p),
-		});
-	return @{$rs->value->{'values'}->value};
+	@{shift->{rpc}->simple_request('Bug.legal_values', {
+		field => shift,
+		product_id => shift,
+	})->{'values'}};
 }
 
-=head2 get_bugs(ids)
+=head2 get_bugs
 
-Gets information about particular bugs in the database. ids is an array of numbers and strings. 
-If an element in the array is entirely numeric, it represents a bug_id from the Bugzilla database to fetch. If it contains any non-numeric characters, it is considered to be a bug alias instead, and the bug with that alias will be loaded.
-Note that it's possible for aliases to be disabled in Bugzilla, in which case you will be told that you have specified an invalid bug_id if you try to specify an alias. (It will be error 100.)
-Returns an array of hashes. Each hash contains the following items:
-id - The numeric bug_id of this bug.
-alias - The alias of this bug. If there is no alias or aliases are disabled in this Bugzilla, this will be an empty string.
-summary - The summary of this bug.
-creation_time - When the bug was created.
-last_change_time - When the bug was last changed.
+	in: ids
+	out: bugs
+
+Gets information about particular bugs in the database. ids is an array of numbers and strings. Returns an array of hashes. Each hash contains the following items:
+	id - The numeric bug_id of this bug.
+	alias - The alias of this bug. If there is no alias or aliases are disabled in this Bugzilla, this will be an empty string.
+	summary - The summary of this bug.
+	creation_time - When the bug was created.
+	last_change_time - When the bug was last changed.
 	
 =cut
 
 sub get_bugs($@) {
 	my ($self, @ids) = @_;
-		my $rs = $self->_xml_request(
-			'Bug.get_bugs',
-			{
-				'ids' => new RPC::XML::array(
-					map { new RPC::XML::int($_) } @ids
-				),
-			});
-	return @{$rs->value->{bugs}->value};
+	@{$self->{rpc}->simple_request('Bug.get_bugs', {
+		'ids' => \@ids,
+	})->{bugs}};
 }
 
-=head2 create_bug(...) 
+=head2 create_bug 
 
 This allows you to create a new bug in Bugzilla. If you specify any invalid fields, they will be ignored. If you specify any fields you are not allowed to set, they will just be set to their defaults or ignored.
 Some params must be set, or an error will be thrown. These params are marked Required.
@@ -315,30 +262,23 @@ Returns one element, id. This is the id of the newly-filed bug.
 
 sub create_bug($%) {
 	my ($self, %p) = @_;
-	my $params = { };
-	foreach my $cp (%p) {
-		if ($cp eq 'cc') {
-			$params->{$cp} = new RPC::XML::array(map { _xstr $_ } $p{$cp});
-			next;
-		}
-		$params->{$cp} = _xstr $p{$cp};
-	}
-	my $rs = $self->_xml_request('Bug.create', $params);
-	return $rs->value->{id}->value;
+	my $rs = $self->{rpc}->simple_request('Bug.create', \%p)->{id};
 }
 
-=head2 named_search(name)
+=head2 named_search
+
+	in: name
+	out: ids
 
 Execute saved search. Returns list of bugs.
 
 =cut
 
 sub named_search($$) {
-	my ($self, $cmd) = @_;
-	return $self->search(cmdtype => 'runnamed', namedcmd => $cmd);
+	shift->search(cmdtype => 'runnamed', namedcmd => shift);
 }
 
-=head2 search(...)
+=head2 search
 
 Execute search. Returns list of bugs.
 
@@ -352,6 +292,17 @@ sub search($%) {
 	return grep s/^.*<id>.*?\?id=(\d+)<\/id>.*$/$1/, split "\n", $r;
 }
 
+=head2 ua
+
+	out: useragent
+
+Returns LWP::UserAgent object user for communications with bugzilla.
+
+=cut
+
+sub ua($) {
+	shift->{rpc}->useragent;
+}
 
 1;
 
