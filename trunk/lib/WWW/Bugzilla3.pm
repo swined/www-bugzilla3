@@ -11,7 +11,7 @@ use Carp;
 use RPC::XML::Client;
 use URI::Escape;
 
-our $VERSION = '0.6';
+our $VERSION = '0.7';
 
 
 =head1 NAME
@@ -20,7 +20,7 @@ WWW::Bugzilla3 - perl bindings for Bugzilla 3.0 api
 
 =head1 VERSION
 
-v0.6
+v0.7
 
 =head1 SYNOPSIS
 
@@ -50,8 +50,7 @@ Creates new Bugzilla3 object.
 
 sub new($%) {
 	my ($class, %param) = @_;
-	%param = { } unless %param;
-	croak "Cannot create Bugzilla3 object without 'site'\n" unless $param{site};
+	croak "Cannot create $class without 'site'\n" unless $param{site};
 	$param{site} = "http://" . $param{site} unless $param{site} =~ /^http:\/\//;
 	$param{site} .= "/" unless $param{site} =~ /\/$/;
 	$param{rpcurl} = $param{site} . 'xmlrpc.cgi';
@@ -66,7 +65,7 @@ sub new($%) {
 =head2 login
 
 	in: login, password
-	out: user id  
+	out: user_id  
 
 Logs into bugzilla.  
 	
@@ -106,7 +105,7 @@ sub offer_account_by_email($$) {
 =head2 create_user
 	
 	in: email, full_name, password
-	out: user id
+	out: user_id
 
 Creates a user account directly in Bugzilla. Returns id of newly created user.
 	
@@ -161,7 +160,8 @@ sub get_accessible_products($) {
 	in: ids
 	out: products
 
-Returns an array of hashes. Each hash describes a product, and has the following items: id, name, description, and internals. The id item is the id of the product. The name item is the name of the product. The description is the description of the product. Finally, the internals is an internal representation of the product.
+Returns an array of hashes. Each hash describes a product, and has the following items: id, name, description, and internals. 
+Internals is an internal representation of the product and can be changed by bugzilla at any time.
 	
 =cut
 
@@ -240,21 +240,23 @@ Some params must be set, or an error will be thrown. These params are marked Req
 Some parameters can have defaults set in Bugzilla, by the administrator. If these parameters have defaults set, you can omit them. These parameters are marked Defaulted.
 Clients that want to be able to interact uniformly with multiple Bugzillas should always set both the params marked Required and those marked Defaulted, because some Bugzillas may not have defaults set for Defaulted parameters, and then this method will throw an error if you don't specify them.
 The descriptions of the parameters below are what they mean when Bugzilla is being used to track software bugs. They may have other meanings in some installations.
-product (string) Required - The name of the product the bug is being filed against. 
-component (string) Required - The name of a component in the product above. 
-summary (string) Required - A brief description of the bug being filed. 
-version (string) Required - A version of the product above; the version the bug was found in. 
-description (string) Defaulted - The initial description for this bug. Some Bugzilla installations require this to not be blank. 
-op_sys (string) Defaulted - The operating system the bug was discovered on. 
-platform (string) Defaulted - What type of hardware the bug was experienced on. 
-priority (string) Defaulted - What order the bug will be fixed in by the developer, compared to the developer's other bugs. 
-severity (string) Defaulted - How severe the bug is. 
-alias (string) - A brief alias for the bug that can be used instead of a bug number when accessing this bug. Must be unique in all of this Bugzilla. 
-assigned_to (username) - A user to assign this bug to, if you don't want it to be assigned to the component owner. 
-cc (array) - An array of usernames to CC on this bug. 
-qa_contact (username) - If this installation has QA Contacts enabled, you can set the QA Contact here if you don't want to use the component's default QA Contact. 
-status (string) - The status that this bug should start out as. Note that only certain statuses can be set on bug creation. 
-target_milestone (string) - A valid target milestone for this product.
+
+	product (string) Required - The name of the product the bug is being filed against. 
+	component (string) Required - The name of a component in the product above. 
+	summary (string) Required - A brief description of the bug being filed. 
+	version (string) Required - A version of the product above; the version the bug was found in. 
+	description (string) Defaulted - The initial description for this bug. Some Bugzilla installations require this to not be blank. 
+	op_sys (string) Defaulted - The operating system the bug was discovered on. 
+	platform (string) Defaulted - What type of hardware the bug was experienced on. 
+	priority (string) Defaulted - What order the bug will be fixed in by the developer, compared to the developer's other bugs. 
+	severity (string) Defaulted - How severe the bug is. 
+	alias (string) - A brief alias for the bug that can be used instead of a bug number when accessing this bug. Must be unique in all of this Bugzilla. 
+	assigned_to (username) - A user to assign this bug to, if you don't want it to be assigned to the component owner. 
+	cc (array) - An array of usernames to CC on this bug. 
+	qa_contact (username) - If this installation has QA Contacts enabled, you can set the QA Contact here if you don't want to use the component's default QA Contact. 
+	status (string) - The status that this bug should start out as. Note that only certain statuses can be set on bug creation. 
+	target_milestone (string) - A valid target milestone for this product.
+
 In addition to the above parameters, if your installation has any custom fields, you can set them just by passing in the name of the field and its value as a string.
 Returns one element, id. This is the id of the newly-filed bug.
 

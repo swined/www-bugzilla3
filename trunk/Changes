@@ -1,5 +1,8 @@
 Revision history for WWW-Bugzilla3
 
+0.7	28 Dec 2007
+	Fix bug#29736, update docs.
+
 0.6	01 Sep 2007
 	Migrate to RPC::XML::Client
 
@@ -17,4 +20,3 @@ Revision history for WWW-Bugzilla3
 	
 0.1	05 Jul 2007 
 	First version, released on an unsuspecting world.
-
