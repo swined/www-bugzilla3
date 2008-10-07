@@ -1,5 +1,8 @@
 Revision history for WWW-Bugzilla3
 
+0.71	07 Oct 2008
+	Fix bug#39850
+
 0.7	28 Dec 2007
 	Fix bug#29736, update docs.
 
