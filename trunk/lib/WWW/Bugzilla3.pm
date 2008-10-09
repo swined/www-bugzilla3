@@ -18,10 +18,6 @@ our $VERSION = '0.71';
 
 WWW::Bugzilla3 - perl bindings for Bugzilla 3.0 api
 
-=head1 VERSION
-
-v0.71
-
 =head1 SYNOPSIS
 
 	use WWW::Bugzilla3;
@@ -298,7 +294,7 @@ sub search($%) {
 
 	out: useragent
 
-Returns LWP::UserAgent object user for communications with bugzilla.
+Returns LWP::UserAgent object used internally for communications with bugzilla.
 
 =cut
 
