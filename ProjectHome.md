@@ -1,0 +1,1 @@
+perl bindings for Bugzilla 3.0 API
